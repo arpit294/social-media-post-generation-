@@ -50,7 +50,7 @@
                 @csrf
                 <label for="message">Prompt</label>
                 <div class="send-row">
-                    <textarea id="message" name="message" rows="2" placeholder="Party changed the size on WhatsApp, but the operator still has the old job card. Or type: generate post">{{ old('message') }}</textarea>
+                    <textarea id="message" class="autosize" name="message" rows="1" placeholder="generate the post">{{ old('message') }}</textarea>
                     <button type="submit" @disabled($busy)>Write post</button>
                 </div>
             </form>

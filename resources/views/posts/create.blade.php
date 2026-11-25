@@ -49,7 +49,7 @@
                 </div>
             </div>
             <label for="prompt">Prompt</label>
-            <textarea id="prompt" class="prompt" name="prompt" placeholder="Party changed the size on WhatsApp, but the operator still has the old job card. Or type: generate post" required>{{ old('prompt') }}</textarea>
+            <textarea id="prompt" class="prompt autosize" name="prompt" rows="1" placeholder="generate the post" required>{{ old('prompt') }}</textarea>
             <button type="submit" @disabled($running)>Write post</button>
             <p id="wait-note" class="meta">On this laptop a post often takes 8 to 15 minutes. Other pages still open while it writes.</p>
         </form>

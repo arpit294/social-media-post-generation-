@@ -231,7 +231,12 @@
             font: inherit;
         }
         textarea { min-height: 96px; resize: vertical; }
-        textarea.prompt { min-height: 148px; }
+        textarea.autosize {
+            min-height: 0;
+            max-height: 240px;
+            overflow-y: hidden;
+            resize: none;
+        }
         .panel .row { margin-bottom: 4px; }
         .panel .row label { margin-top: 0; }
         input:focus, select:focus, textarea:focus { outline: 2px solid var(--teal); border-color: transparent; }
@@ -361,5 +366,19 @@
         </div>
     </div>
     @stack('scripts')
+    <script>
+        document.querySelectorAll('textarea.autosize').forEach(function (box) {
+            const fit = function () {
+                const max = 240;
+                box.style.height = 'auto';
+                const full = box.scrollHeight;
+                box.style.overflowY = full > max ? 'auto' : 'hidden';
+                box.style.height = Math.min(full, max) + 'px';
+            };
+            box.addEventListener('input', fit);
+            window.addEventListener('resize', fit);
+            fit();
+        });
+    </script>
 </body>
 </html>

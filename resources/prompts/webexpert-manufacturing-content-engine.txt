@@ -82,7 +82,7 @@ FORBIDDEN: succession, family issues, market demand, imports, power cuts, financ
 
 Format: ID, problem, smallest software fix, 10-minute test, picture objects.
 
-When the user prompt is only a request to generate a post, do not ask which topic. Choose one topic ID that is not in the recent posts, rotate the department, and write the caption and the IMAGE line immediately. Use that topic's picture objects unless the user named different objects.
+When the user message contains an assigned topic, write that topic only. Do not ask which topic and do not choose a different one. When the user prompt names a shop-floor moment, that moment is the post.
 
 ORDER MANAGEMENT
 
@@ -243,19 +243,21 @@ Bottom strip (bottom 16-18%): logo, company name, tagline, phone, website, and e
 
 The artwork itself contains no text, letters, numbers, logos, or faces, and leaves the top 8% and the bottom 18% empty. If a person must be shown, use a single faceless pictogram with no eyes and no portrait.
 
-The IMAGE line is one staged picture, four to six sentences, not a list of objects. Sentence 1 states the idea a viewer understands in one look. The next sentences place each object: what is in front, what is missing, and which single object shows the broken handoff. Name the department. A small Gujarat factory. Never a glass office, a handshake, a lightbulb, or a rocket.
+The IMAGE line is one picture an image model can draw, four to six sentences. Each sentence places one physical object and says where it sits. One object is missing, shown as an empty dashed outline. The problem is visible from the placement. Do not explain it.
 
-Do not copy a Picture line from Section 6. Those objects are raw material. Stage them so this picture could not be reused for another topic. Do not put colors, hex codes, layout notes, the company name, the caption, or hashtags in the IMAGE line. Papers and labels stay blank.
+Use a machine, crate, rack, blank card, telephone, gate, or clock. A phone lies face down. At most one faceless pictogram, seen from the back, with no eyes. A small Gujarat factory. Never a glass office, a handshake, a lightbulb, a rocket, a screen, a sticker, or a signed paper.
+
+Do not copy a Picture line from Section 6. Do not write broken handoff, problem, looking, or expression. Do not put colors, hex codes, layout notes, the company name, the caption, or hashtags in the IMAGE line. Papers and labels stay blank.
 
 16. DUPLICATE CONTROL
 
-Inputs: recent_topic_ids, last_3_patterns, recent_posts (when available).
-
-Pick a topic ID not in recent_topic_ids.
+Before writing, read recent_posts. That list is every saved post for this account, newest first.
+If the user message contains an assigned topic, write that topic only.
+Do not repeat a hook, a topic ID, or the same shop-floor moment in different words.
+Pick a topic ID that is not in recent_topic_ids and not described in recent_posts, unless an assigned topic is already given.
 Same root cause in different words counts as a duplicate.
 Rotate categories across consecutive posts: order, production, stores, dispatch, reporting, team.
-If a duplicate is flagged, regenerate with a different topic or moment. Maximum 2 retries.
-If recent_posts is unavailable, do not pretend to know the history.
+If recent_posts says None yet, there is no history to avoid. Do not invent a history.
 
 17. FINAL QUALITY CONTROL (check before returning)
 Reader can point to the object and the person waiting.

@@ -1,0 +1,121 @@
+# Shop-floor issues from 100 real-life manufacturing situations. One issue per line.
+
+Production planning
+PLN-01 A rush order is added after the daily production plan is printed. The supervisor tells one team verbally, but the cutting section continues with the original sequence, delaying the urgent order.
+PLN-02 A machine is scheduled for two jobs that both require the same tool. The conflict is noticed only when the second job reaches the machine, leaving operators waiting.
+PLN-03 The plan assumes every machine will run at full capacity. A machine with a slower cycle time falls behind, so the next operation receives work later than expected.
+PLN-04 A job is released to the shop floor before all raw materials are available. Operators complete the first stage and then leave the work-in-progress waiting for missing material.
+PLN-05 A production target is changed during the shift, but the revised quantity is not passed to packing. Packing prepares labels and cartons for the old quantity.
+PLN-06 Two orders have similar product names but different delivery dates. They are placed next to each other on the planning board, and a team starts the later order first.
+PLN-07 A breakdown pushes one job into the next shift. The handover note lists the machine status but not the exact quantity completed, so the next shift repeats a count.
+PLN-08 The production plan is updated in a spreadsheet, while printed copies remain near machines. Operators follow different versions of the schedule.
+PLN-09 A batch is split across two machines to meet a deadline, but both operators record output in separate notebooks. The supervisor cannot see the combined progress without collecting both records.
+PLN-10 A planned maintenance slot is not reflected in the production schedule. The machine is unavailable when the job is due to start, forcing last-minute rescheduling.
+
+Raw material and stores
+MAT-01 The system or stock register shows enough sheet metal, but part of the stock is already reserved for another order. The store issues material to the wrong job and the shortage appears later.
+MAT-02 A supplier delivers a different material grade from the purchase order. The difference is noticed only when the quality team checks the certificate before production.
+MAT-03 Material is received at the gate, but the inward entry is delayed. Production sees the old stock balance and raises an unnecessary urgent purchase request.
+MAT-04 Two material coils have similar labels but different thicknesses. A storekeeper picks the wrong coil because the thickness is not visible on the outer face.
+MAT-05 A material lot is placed in the general rack before inspection is complete. An operator picks it for production, not knowing it is still on quality hold.
+MAT-06 The physical count finds fewer fasteners than the inventory register. The difference is traced to small issues taken by technicians without recording them.
+MAT-07 A minimum-stock alert is based on monthly average use. A sudden large customer order consumes the material faster, and the reorder alert arrives too late.
+MAT-08 A store issues a full pack when the job needs only part of it. The unused quantity is left beside the machine without a job or lot reference.
+MAT-09 A supplier changes the packaging quantity, but the purchase entry still uses the old unit conversion. The received stock balance is incorrect.
+MAT-10 Material returned from the shop floor is put back into a rack without confirming its grade, lot number, or usable condition.
+
+Quality control
+QLT-01 An inspection finds a dimension outside tolerance, but the affected batch has already moved to the next operation. The team must identify and separate the pieces already processed.
+QLT-02 A measuring instrument is past its calibration due date. The operator uses it because the expiry sticker is difficult to notice, making the inspection result unreliable.
+QLT-03 The drawing revision changes, but an old inspection checklist remains at the workstation. The inspector checks the previous dimensions and misses the new requirement.
+QLT-04 A sample passes inspection, so the full batch is released. Later pieces show variation because the process drifted after the sample was taken.
+QLT-05 A supplier certificate is saved in an email inbox instead of with the material receipt. During an audit, the team spends time finding which certificate belongs to the lot.
+QLT-06 A rejected part is placed in a normal work-in-progress tray. Another operator assumes it is approved and sends it for assembly.
+QLT-07 The customer reports a defect, but the dispatch record does not link the shipped serial numbers to the production batch. The team struggles to identify the affected units.
+QLT-08 Rework is completed, but the re-inspection result is written on a separate sheet that is not attached to the job card. The job appears open even though the part is ready.
+QLT-09 Different inspectors interpret a visual defect standard differently. Similar parts receive different decisions across shifts.
+QLT-10 A recurring defect is corrected on the machine, but the cause and corrective action are not recorded. The same defect returns on a later batch.
+
+Machine maintenance
+MNT-01 A machine begins making an unusual noise, but the operator waits until the end of the shift to report it. The machine stops during the next high-priority job.
+MNT-02 A maintenance technician replaces a component but does not update the machine history. The next technician cannot tell which part was installed or when.
+MNT-03 A spare bearing is physically available, but its location in the store record is outdated. Maintenance loses time searching multiple racks during a breakdown.
+MNT-04 Preventive maintenance is marked complete on a checklist, but the lubrication point behind a guard was missed. The issue appears during the next inspection.
+MNT-05 A breakdown is reported by phone, but no work order is created. Production and maintenance disagree later about when the machine was taken out of service.
+MNT-06 A machine is returned to production after repair without a trial run or documented approval. The first production batch reveals that the fault remains.
+MNT-07 The same machine fault is reported repeatedly, but each incident is treated as a separate repair. No one reviews the pattern to identify the underlying cause.
+MNT-08 A technician borrows a tool from another maintenance team and forgets to return it. The next urgent repair is delayed because the tool cannot be found.
+MNT-09 A maintenance job is planned during a shift change, but the incoming supervisor is not informed. Operators attempt to start a machine that is still isolated for repair.
+MNT-10 The maintenance calendar is kept separately from the production calendar. A service task is scheduled during a committed delivery run.
+
+Workforce and shift handover
+SHF-01 The experienced operator is absent, and the replacement has not been trained on the product setup. The shift spends time asking other operators for instructions.
+SHF-02 The outgoing shift records total output but not rejected quantity or pending work. The incoming supervisor starts the shift with an incomplete picture.
+SHF-03 An operator is assigned to a machine that requires a specific authorization. The mismatch is discovered only during the supervisor's routine check.
+SHF-04 A worker is moved to another line during the shift, but the attendance or job allocation sheet is not updated. Output is attributed to the wrong team.
+SHF-05 A verbal instruction changes the sequence of operations, but only some workers hear it. Two teams follow different methods for the same order.
+SHF-06 A new worker follows an old setup note kept near the machine. The current process requires a different setting, resulting in trial pieces and wasted time.
+SHF-07 Overtime is approved verbally, but the attendance record is not updated. Payroll and the department supervisor later have different hour totals.
+SHF-08 A safety briefing is completed, but the attendance sheet is not linked to the shift or work area. The supervisor cannot quickly confirm who received the briefing.
+SHF-09 A key operator knows a special adjustment for a difficult product, but the method exists only in that person's experience. When the operator is unavailable, setup takes longer.
+SHF-10 The shift handover mentions that a machine is 'almost ready' but does not state the pending checks. The next team assumes it is cleared and starts too early.
+
+Order management and customer changes
+CUS-01 A customer changes the required dimensions after confirming the order. Sales sends the revised details on WhatsApp, but the operator continues using the old printed job card.
+CUS-02 A customer approves a sample with a small modification, but the approved sample is not tagged to the order. Production uses the earlier sample as its reference.
+CUS-03 The sales team promises a delivery date before checking current machine capacity. Production later has to rearrange committed jobs to meet the promise.
+CUS-04 A customer places a repeat order but changes the packaging requirement. The previous order details are copied without noticing the new instruction.
+CUS-05 A purchase order contains a different part number from the quotation. The mismatch is discovered only when the job reaches final inspection.
+CUS-06 A customer cancels part of an order by email, but the cancellation is not passed to stores. Material continues to be issued for the cancelled quantity.
+CUS-07 The customer requests delivery in two batches, but the dispatch plan still shows one full shipment. The first delivery is delayed while paperwork is corrected.
+CUS-08 A salesperson records a special tolerance in a message, but it is not added to the approved drawing or job traveler. Production cannot confirm which requirement is authoritative.
+CUS-09 A customer complaint is discussed over a call, but no owner or due date is assigned to the follow-up. The issue remains unresolved between departments.
+CUS-10 The order status is updated in the sales spreadsheet but not shared with production. The customer is told the job is ready while packing is still pending.
+
+Work-in-progress and material flow
+WIP-01 Completed parts wait beside a machine because the next operation has no empty trolley. The machine operator keeps finished parts in the work area, reducing space for the next batch.
+WIP-02 Two similar batches are placed on the same trolley without separate tags. The next department cannot confidently identify which pieces belong to each order.
+WIP-03 A job card becomes detached from a container during movement between departments. The receiving team has to stop and identify the parts before processing.
+WIP-04 The next operation is ready, but the previous department has not entered its completion quantity. The receiving team does not know whether the full batch has arrived.
+WIP-05 A batch is moved to the wrong staging area because the rack labels are faded. It is found only when the next operation asks for the material.
+WIP-06 A production trolley is loaded above its safe capacity to reduce trips. Parts at the bottom are damaged while being moved.
+WIP-07 The first operation completes faster than the bottleneck process can accept work. Excess work-in-progress accumulates and blocks the aisle.
+WIP-08 A semi-finished part is sent for outside processing, but the dispatch note does not list the exact quantity and identification marks. The returned quantity is difficult to reconcile.
+WIP-09 A returned batch from subcontracting is placed directly into the next process without checking for transit damage or quantity differences.
+WIP-10 A finished batch is moved to the dispatch area before final quality release. Packing begins, then has to stop when inspection places the batch on hold.
+
+Dispatch and delivery
+SHP-01 The packing team uses an old carton specification because the latest customer packaging instruction was shared only with sales.
+SHP-02 The invoice is prepared for the ordered quantity, but the actual packed quantity is lower due to rejected pieces. The mismatch is found at the loading point.
+SHP-03 A vehicle arrives earlier than planned, but the finished goods are still waiting for final documents. The loading team and transporter both lose time.
+SHP-04 Two customer orders have similar product descriptions. Cartons are staged next to each other and one pallet is loaded onto the wrong vehicle.
+SHP-05 The dispatch register records the vehicle number but not the package count. When the customer reports a shortage, the shipment record is incomplete.
+SHP-06 A delivery note is printed before the final quantity is confirmed. Staff manually correct the paperwork at the gate, increasing the chance of errors.
+SHP-07 A finished product needs protective packing for a long-distance shipment, but the packing instruction is not visible to the packing operator.
+SHP-08 The transporter changes the vehicle at short notice. The gate pass still carries the original vehicle details and must be corrected before exit.
+SHP-09 A shipment is ready but the customer has not confirmed the unloading slot. The vehicle waits while the dispatch team tries to contact the customer.
+SHP-10 Proof of delivery is received by a salesperson but is not saved with the dispatch record. Accounts cannot confirm delivery when following up on payment.
+
+Purchasing and suppliers
+PUR-01 A supplier confirms a delivery date over the phone, but the purchase order still shows the original date. Production plans around the wrong expected arrival.
+PUR-02 A purchase request is raised twice by two departments because neither can see that the other has already requested the same item.
+PUR-03 A supplier sends a partial quantity without clearly identifying the balance due. Stores closes the receipt as complete and the shortage is noticed later.
+PUR-04 The purchase team selects the lowest quotation without checking whether the material specification matches the approved requirement.
+PUR-05 A supplier changes a component brand after receiving the order. The substitute reaches assembly before engineering approves the change.
+PUR-06 A supplier invoice includes a rate different from the purchase order. The mismatch is found during payment processing rather than at receipt.
+PUR-07 A critical consumable is sourced from one supplier only. When that supplier delays, maintenance has no approved alternative ready.
+PUR-08 The supplier's promised dispatch date is recorded, but the actual transport tracking is not followed. The team discovers the delay only after the expected arrival date.
+PUR-09 A returned defective component is sent back to the supplier, but the return reference is not linked to the original receipt. Replacement tracking becomes confusing.
+PUR-10 Supplier performance is discussed informally, but late deliveries and rejection quantities are not recorded consistently for review.
+
+Costing, records and compliance
+REC-01 Production records actual material consumption on paper, while costing uses the standard quantity from an old spreadsheet. The job margin is calculated using outdated inputs.
+REC-02 Scrap is collected in a common bin without recording which job generated it. The production team cannot compare scrap levels between orders.
+REC-03 Machine downtime is written in operator notebooks using different descriptions. Management cannot easily separate breakdown time from waiting or setup time.
+REC-04 An audit asks for the latest approved work instruction. Several printed versions are found near machines, and staff are unsure which one is current.
+REC-05 A safety inspection identifies an action, but the report does not assign a responsible person or completion date. The same item appears again in the next review.
+REC-06 Chemical containers are moved to another storage area, but the location register is not updated. Staff spend time locating the correct safety data sheet.
+REC-07 A batch traceability record is completed after production from memory. Some operator and material-lot details are missing or uncertain.
+REC-08 A customer-specific inspection report is saved under a generic filename. Staff cannot identify the correct report when the customer asks for it.
+REC-09 The factory maintains separate spreadsheets for production, stores and dispatch. Their totals differ because updates are entered at different times.
+REC-10 A monthly report is prepared by manually combining several department files. One department sends an older version, so the final figures need correction.

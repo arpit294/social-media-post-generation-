@@ -60,6 +60,8 @@ class ManufacturingPostTest extends TestCase
             $this->assertStringContainsString('The stock register and Tally show different quantities for the same lot.', $body['messages'][1]['content']);
             $this->assertStringContainsString('Picture:', $body['messages'][0]['content']);
             $this->assertStringContainsString('None yet.', $body['messages'][1]['content']);
+            $this->assertStringNotContainsString('Assigned topic', $body['messages'][1]['content']);
+            $this->assertStringNotContainsString('Reference list', $body['messages'][1]['content']);
             $this->assertStringContainsString('Put one shop-floor emoji on the hook only', $body['messages'][1]['content']);
 
             return Http::response([
@@ -111,10 +113,15 @@ class ManufacturingPostTest extends TestCase
                 'Party ordered 1,000 pieces.',
                 $request->data()['messages'][1]['content'],
             );
+            $content = $request->data()['messages'][1]['content'];
             $this->assertStringContainsString(
                 'Do not repeat their hook or topic',
-                $request->data()['messages'][1]['content'],
+                $content,
             );
+            $this->assertStringContainsString('Reference list', $content);
+            $this->assertStringContainsString('must not be mentioned in the reference list', $content);
+            $this->assertStringContainsString('production planning', $content);
+            $this->assertStringNotContainsString('Write this situation only', $content);
 
             return Http::response([
                 'message' => [
@@ -132,6 +139,134 @@ class ManufacturingPostTest extends TestCase
             'result' => [
                 'data' => ['post_text' => "Party ordered 1,000 pieces.\n\nThree challans went out."],
             ],
+            'finished_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->post('/posts', [
+                'platform' => 'LinkedIn',
+                'language' => 'English',
+                'prompt' => 'generate post',
+            ])
+            ->assertRedirect('/');
+
+        $written = Generation::query()->where('user_id', $user->id)->latest('id')->first();
+        $this->assertSame('NEW-PLN', $written->payload['topic']);
+    }
+
+    public function test_generate_post_skips_topics_already_used_by_any_saved_post(): void
+    {
+        Http::fake(function ($request) {
+            $content = $request->data()['messages'][1]['content'];
+
+            $this->assertStringContainsString('Reference list', $content);
+            $this->assertStringContainsString('must not be mentioned in the reference list', $content);
+            $this->assertStringContainsString('Topic IDs already used:', $content);
+            $this->assertStringContainsString('CUS-01', $content);
+            $this->assertDoesNotMatchRegularExpression('/Invent one new shop-floor situation in customer changes/u', $content);
+
+            return Http::response([
+                'message' => [
+                    'content' => "The owner is the status desk.\nIMAGE: Three pictograms and a desk phone.",
+                ],
+            ]);
+        });
+
+        $user = User::factory()->create();
+        $captions = [
+            'STR-01' => "Is your stock register different from your Tally balance?\n\nThe storekeeper writes a slip. Tally stays blank for days.",
+            'STR-02' => "Does your storekeeper know which stock is actually free?\n\nThe rack shows 500 kg. 400 kg is earmarked.",
+            'ORD-01' => "Party changed the size after the order was confirmed?\n\nSales posts the change on WhatsApp. The operator runs the old printed job card.",
+            'PRD-01' => "Is your production status stuck on In Progress?\n\nFive days of no movement.",
+            'DSP-02' => "Party ordered 1,000 pieces. How many are still pending?\n\nThree challans went out. Nobody can say the balance.",
+            'TEM-01' => "Does your factory stop moving when your key clerk is away?\n\nOne person holds every detail.",
+        ];
+
+        $minutes = 1;
+
+        foreach ($captions as $caption) {
+            Generation::query()->create([
+                'user_id' => $user->id,
+                'kind' => 'post',
+                'status' => 'done',
+                'payload' => ['prompt' => 'generate the post'],
+                'result' => ['data' => ['post_text' => $caption]],
+                'finished_at' => now()->subMinutes($minutes),
+            ]);
+            $minutes++;
+        }
+
+        $this->actingAs($user)
+            ->post('/posts', [
+                'platform' => 'LinkedIn',
+                'language' => 'English',
+                'prompt' => 'generate the post',
+            ])
+            ->assertRedirect('/');
+
+        $written = Generation::query()->where('user_id', $user->id)->latest('id')->first();
+        $this->assertStringStartsWith('NEW-', $written->payload['topic']);
+    }
+
+    public function test_a_new_post_is_checked_against_every_saved_post(): void
+    {
+        Http::fake(function ($request) {
+            $content = $request->data()['messages'][1]['content'];
+
+            $this->assertStringContainsString('Newest saved post.', $content);
+            $this->assertStringContainsString('Saved post 1.', $content);
+            $this->assertStringContainsString('Saved post 19.', $content);
+            $this->assertStringContainsString('Oldest post that must stay out.', $content);
+            $this->assertStringContainsString('Reference list', $content);
+            $this->assertStringContainsString('must not be mentioned in the reference list', $content);
+            $this->assertStringContainsString('production planning', $content);
+            $this->assertStringNotContainsString('This post belongs to someone else.', $content);
+
+            return Http::response([
+                'message' => [
+                    'content' => "A different hook.\nIMAGE: A crate with a missing label.",
+                ],
+            ]);
+        });
+
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+
+        Generation::query()->create([
+            'user_id' => $user->id,
+            'kind' => 'post',
+            'status' => 'done',
+            'payload' => ['topic' => 'OLD'],
+            'result' => ['data' => ['post_text' => 'Oldest post that must stay out.']],
+            'finished_at' => now()->subDays(3),
+        ]);
+
+        foreach (range(1, 19) as $index) {
+            Generation::query()->create([
+                'user_id' => $user->id,
+                'kind' => 'post',
+                'status' => 'done',
+                'payload' => ['topic' => 'T-'.$index],
+                'result' => ['data' => ['post_text' => "Saved post {$index}."]],
+                'finished_at' => now()->subMinutes(40 - $index),
+            ]);
+        }
+
+        Generation::query()->create([
+            'user_id' => $user->id,
+            'kind' => 'chat_post',
+            'status' => 'done',
+            'payload' => ['prompt' => 'generate post'],
+            'result' => ['data' => ['post_text' => 'Newest saved post.']],
+            'finished_at' => now(),
+        ]);
+
+        Generation::query()->create([
+            'user_id' => $other->id,
+            'kind' => 'post',
+            'status' => 'done',
+            'payload' => ['topic' => 'OTHER'],
+            'result' => ['data' => ['post_text' => 'This post belongs to someone else.']],
             'finished_at' => now(),
         ]);
 

@@ -77,17 +77,83 @@ class Generation extends Model
             ->values();
     }
 
-    public static function recentBriefsFor(int $userId, int $limit = 5): string
+    /**
+     * @return Collection<int, self>
+     */
+    public static function recentPosts(int $userId, int $limit = 20): Collection
     {
-        return static::finishedFor($userId)
+        return static::query()
+            ->finished($userId)
+            ->limit($limit * 2)
+            ->get()
+            ->filter(fn (self $generation): bool => $generation->caption() !== null)
             ->take($limit)
-            ->map(function (self $generation): string {
-                $topic = trim((string) data_get($generation->payload, 'topic'));
-                $title = $generation->listTitle();
+            ->values();
+    }
 
-                return $topic !== '' ? $topic.': '.$title : $title;
+    /**
+     * @return Collection<int, self>
+     */
+    public static function historyForPlanning(int $userId): Collection
+    {
+        return static::query()
+            ->where('user_id', $userId)
+            ->where('status', 'done')
+            ->whereIn('kind', ['post', 'chat_post', 'chat'])
+            ->latest('finished_at')
+            ->latest('id')
+            ->get()
+            ->filter(fn (self $generation): bool => $generation->caption() !== null)
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, self>  $posts
+     */
+    public static function briefsFor(Collection $posts): string
+    {
+        return $posts
+            ->values()
+            ->map(function (self $generation, int $index): string {
+                $topic = trim((string) data_get($generation->payload, 'topic'));
+
+                if (preg_match('/^[A-Z]{2,5}-\d{2}$/', $topic) !== 1) {
+                    $topic = '';
+                }
+
+                $moment = Str::of((string) $generation->caption())
+                    ->explode("\n")
+                    ->map(fn (string $line): string => trim($line))
+                    ->filter(fn (string $line): bool => $line !== ''
+                        && ! str_starts_with($line, '#')
+                        && ! str_contains($line, 'Webexpert Infotech'))
+                    ->take(4)
+                    ->implode(' ');
+                $moment = Str::limit($moment, 280);
+                $label = $topic !== '' ? $topic.': '.$moment : $moment;
+
+                return ($index + 1).'. '.$label;
             })
             ->implode("\n");
+    }
+
+    public static function recentBriefsFor(int $userId, int $limit = 20): string
+    {
+        return static::briefsFor(static::recentPosts($userId, $limit));
+    }
+
+    public static function allBriefsFor(int $userId): string
+    {
+        return static::briefsFor(static::finishedFor($userId));
+    }
+
+    public static function recentTopicIdsFor(int $userId, int $limit = 20): string
+    {
+        return static::recentPosts($userId, $limit)
+            ->map(fn (self $generation): string => trim((string) data_get($generation->payload, 'topic')))
+            ->filter(fn (string $topic): bool => $topic !== '')
+            ->unique()
+            ->implode(', ');
     }
 
     public function finishedLabel(): string

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Conversation;
+use App\Models\Generation;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -123,9 +124,14 @@ class AgentChat
      */
     private function transcript(User $user, Conversation $conversation): array
     {
+        $recent = Generation::allBriefsFor($user->id);
+        $savedPosts = $recent === ''
+            ? ''
+            : "\n\nEvery saved post for this account, newest first. Do not repeat their hook or topic, and do not retell the same shop-floor moment in different words:\n".$recent;
+
         $messages = [[
             'role' => 'system',
-            'content' => $this->posts->instructions()."\n\nYou are the agent for {$user->name}. Use only this knowledge base. Do not invent clients or numbers. Never write an asterisk. No markdown, no bold, and no * bullets.\n\nChat output rule, which overrides Section 19: the default reply is the readable post itself. Write only the caption, the footer, and the hashtags. Put one shop-floor emoji on the hook only. Do not put an emoji on any other line. Never send JSON, field names, hook_candidates, or self_check. If the user asks for JSON, still write the caption. A clarifying question stays plain text, with no IMAGE line. When you write the finished caption, add a blank line and then IMAGE: followed by four to six sentences that stage one specific picture. Sentence 1 is the broken handoff in one look. Then place each object: what is in front, what is missing, and which object shows the problem. Do not list objects. Do not copy a Picture line. No style notes, colors, or hex codes.",
+            'content' => $this->posts->instructions()."\n\nYou are the agent for {$user->name}. Use only this knowledge base. Do not invent clients or numbers. Never write an asterisk. No markdown, no bold, and no * bullets.\n\nChat output rule, which overrides Section 19: the default reply is the readable post itself. Write only the caption, the footer, and the hashtags. Put one shop-floor emoji on the hook only. Do not put an emoji on any other line. Never send JSON, field names, hook_candidates, or self_check. If the user asks for JSON, still write the caption. A clarifying question stays plain text, with no IMAGE line. When you write the finished caption, add a blank line and then IMAGE: followed by four to six sentences an image model can draw. Each sentence places one physical object and says where it sits. One object is an empty dashed outline. A phone lies face down. At most one faceless pictogram, seen from the back, with no eyes. Do not list objects. Do not copy a Picture line. Do not write broken handoff, problem, looking, expression, screen, sticker, or signed paper. No style notes, colors, or hex codes.".$savedPosts,
         ]];
 
         foreach ($conversation->messages()->orderBy('id')->get() as $message) {
