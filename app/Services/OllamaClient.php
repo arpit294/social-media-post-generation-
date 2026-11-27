@@ -20,7 +20,8 @@ class OllamaClient
             'think' => (bool) config('ollama.think'),
             'messages' => $messages,
             'options' => [
-                'temperature' => 0.4,
+                'temperature' => 0.5,
+                'repeat_penalty' => 1.15,
                 'num_ctx' => (int) config('ollama.num_ctx'),
                 'num_predict' => $numPredict ?? (int) config('ollama.num_predict'),
             ],

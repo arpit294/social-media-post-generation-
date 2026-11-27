@@ -52,15 +52,15 @@
             <div class="add-key">
                 <div>
                     <label for="key_name">Name</label>
-                    <input id="key_name" name="name" value="{{ old('name') }}" placeholder="OpenAI" required>
+                    <input id="key_name" name="name" value="{{ old('name') }}" placeholder="Claude 3.5 Sonnet" required>
                 </div>
                 <div>
                     <label for="api_key">API key</label>
-                    <input id="api_key" name="api_key" type="password" autocomplete="off" placeholder="sk-..." required>
+                    <input id="api_key" name="api_key" type="password" autocomplete="off" placeholder="sk-ant-..." required>
                 </div>
                 <div>
                     <label for="model">Model</label>
-                    <input id="model" name="model" value="{{ old('model', 'gpt-4o-mini') }}">
+                    <input id="model" name="model" value="{{ old('model', 'claude-3-5-sonnet-20241022') }}" placeholder="claude-3-5-sonnet-20241022">
                 </div>
                 <button type="submit">Add API key</button>
             </div>

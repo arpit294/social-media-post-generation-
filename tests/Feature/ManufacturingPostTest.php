@@ -118,10 +118,18 @@ class ManufacturingPostTest extends TestCase
                 'Do not repeat their hook or topic',
                 $content,
             );
-            $this->assertStringContainsString('Reference list', $content);
-            $this->assertStringContainsString('must not be mentioned in the reference list', $content);
-            $this->assertStringContainsString('production planning', $content);
-            $this->assertStringNotContainsString('Write this situation only', $content);
+            $this->assertStringContainsString('Assigned daily topic', $content);
+            $this->assertStringContainsString('Write this situation only', $content);
+            $this->assertStringContainsString('Old carton labels', $content);
+            $this->assertStringContainsString('hours lost on a normal day', $content);
+            $this->assertStringContainsString('which hours and which cost', $content);
+            $this->assertStringContainsString('The solution must answer that same daily problem', $content);
+            $this->assertStringContainsString('before the next wrong action', $content);
+            $this->assertStringContainsString('must contain the words custom software', $content);
+            $this->assertStringContainsString('Do not write "does not happen"', $content);
+            $this->assertStringContainsString('Do not paste a cost from another problem', $content);
+            $this->assertStringContainsString('rebuilt cartons and a waiting truck', $content);
+            $this->assertStringNotContainsString('Pending challan balance', $content);
 
             return Http::response([
                 'message' => [
@@ -151,7 +159,7 @@ class ManufacturingPostTest extends TestCase
             ->assertRedirect('/');
 
         $written = Generation::query()->where('user_id', $user->id)->latest('id')->first();
-        $this->assertSame('NEW-PLN', $written->payload['topic']);
+        $this->assertSame('DAY-01', $written->payload['topic']);
     }
 
     public function test_generate_post_skips_topics_already_used_by_any_saved_post(): void
@@ -159,11 +167,13 @@ class ManufacturingPostTest extends TestCase
         Http::fake(function ($request) {
             $content = $request->data()['messages'][1]['content'];
 
-            $this->assertStringContainsString('Reference list', $content);
-            $this->assertStringContainsString('must not be mentioned in the reference list', $content);
+            $this->assertStringContainsString('Assigned daily topic', $content);
+            $this->assertStringContainsString('Write this situation only', $content);
+            $this->assertStringContainsString('Old carton labels', $content);
             $this->assertStringContainsString('Topic IDs already used:', $content);
             $this->assertStringContainsString('CUS-01', $content);
-            $this->assertDoesNotMatchRegularExpression('/Invent one new shop-floor situation in customer changes/u', $content);
+            $this->assertStringNotContainsString('Pending challan balance:', $content);
+            $this->assertStringNotContainsString('WhatsApp job card:', $content);
 
             return Http::response([
                 'message' => [
@@ -205,7 +215,7 @@ class ManufacturingPostTest extends TestCase
             ->assertRedirect('/');
 
         $written = Generation::query()->where('user_id', $user->id)->latest('id')->first();
-        $this->assertStringStartsWith('NEW-', $written->payload['topic']);
+        $this->assertSame('DAY-01', $written->payload['topic']);
     }
 
     public function test_a_new_post_is_checked_against_every_saved_post(): void
@@ -217,9 +227,8 @@ class ManufacturingPostTest extends TestCase
             $this->assertStringContainsString('Saved post 1.', $content);
             $this->assertStringContainsString('Saved post 19.', $content);
             $this->assertStringContainsString('Oldest post that must stay out.', $content);
-            $this->assertStringContainsString('Reference list', $content);
-            $this->assertStringContainsString('must not be mentioned in the reference list', $content);
-            $this->assertStringContainsString('production planning', $content);
+            $this->assertStringContainsString('Assigned daily topic', $content);
+            $this->assertStringContainsString('Old carton labels', $content);
             $this->assertStringNotContainsString('This post belongs to someone else.', $content);
 
             return Http::response([
@@ -277,6 +286,46 @@ class ManufacturingPostTest extends TestCase
                 'prompt' => 'generate post',
             ])
             ->assertRedirect('/');
+    }
+
+    public function test_a_used_daily_topic_is_not_assigned_again(): void
+    {
+        Http::fake(function ($request) {
+            $content = $request->data()['messages'][1]['content'];
+
+            $this->assertStringContainsString('Untagged offcut', $content);
+            $this->assertStringNotContainsString('Old carton labels:', $content);
+
+            return Http::response([
+                'message' => [
+                    'content' => "The offcut has no lot.\nIMAGE: A coil beside a machine.",
+                ],
+            ]);
+        });
+
+        $user = User::factory()->create();
+
+        Generation::query()->create([
+            'user_id' => $user->id,
+            'kind' => 'post',
+            'status' => 'done',
+            'payload' => ['topic' => 'DAY-01', 'prompt' => 'generate the post'],
+            'result' => [
+                'data' => ['post_text' => 'Packing prints carton labels for the previous quantity.'],
+            ],
+            'finished_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->post('/posts', [
+                'platform' => 'LinkedIn',
+                'language' => 'English',
+                'prompt' => 'generate the post',
+            ])
+            ->assertRedirect('/');
+
+        $written = Generation::query()->where('user_id', $user->id)->latest('id')->first();
+        $this->assertSame('DAY-02', $written->payload['topic']);
     }
 
     public function test_finished_posts_are_listed_with_the_date_and_the_time_they_took(): void

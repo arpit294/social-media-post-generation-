@@ -336,6 +336,52 @@ class KnowledgeAndChatTest extends TestCase
         $this->assertStringNotContainsString('{', $saved);
     }
 
+    public function test_an_upgrade_request_rewrites_the_previous_post(): void
+    {
+        Http::fake(function ($request) {
+            $content = $request->data()['messages'][1]['content'];
+
+            $this->assertStringContainsString('POST TO UPGRADE', $content);
+            $this->assertStringContainsString('Do not return the previous caption', $content);
+            $this->assertStringContainsString('Packing prints the old labels.', $content);
+            $this->assertStringContainsString('Upgrade checklist', $content);
+            $this->assertStringContainsString('A sharper hook that names the same object', $content);
+            $this->assertStringNotContainsString('Assigned daily topic', $content);
+            $this->assertStringNotContainsString('The latest user prompt is the post to write', $content);
+
+            return Http::response([
+                'message' => [
+                    'content' => "The labels still say the old quantity.\n\nThe cartons are already closed.\n\nWebexpert Infotech | Custom software for manufacturers.\nIMAGE: A stack of cartons and a sheet of blank labels on a packing bench.",
+                ],
+            ]);
+        });
+
+        $user = User::factory()->create();
+        $conversation = Conversation::query()->create([
+            'user_id' => $user->id,
+            'title' => 'Post chat',
+        ]);
+        $conversation->messages()->create([
+            'role' => 'user',
+            'content' => 'generate the post',
+        ]);
+        $conversation->messages()->create([
+            'role' => 'assistant',
+            'content' => 'Packing prints the old labels.',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('chat.session.store', $conversation), [
+                'message' => 'upgrade this post with better content',
+            ])
+            ->assertRedirect(route('chat.show', $conversation));
+
+        $latest = Message::query()->where('role', 'assistant')->latest('id')->first();
+        $this->assertNotNull($latest);
+        $this->assertStringContainsString('The labels still say the old quantity.', $latest->content);
+        $this->assertStringNotContainsString('Packing prints the old labels.', $latest->content);
+    }
+
     public function test_a_json_reply_without_a_caption_becomes_readable_sentences(): void
     {
         $text = ReplyText::forChat(json_encode([

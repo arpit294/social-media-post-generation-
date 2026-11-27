@@ -25,6 +25,21 @@ class ManufacturingPostGenerator
         ], 1200);
         $parts = $this->captionAndImage($raw);
 
+        $prompt = trim((string) ($input['prompt'] ?? ''));
+        $revision = $this->wantsRevision($prompt);
+        $reviseFrom = trim((string) ($input['revise_from'] ?? ''));
+
+        if ($revision && $reviseFrom !== '' && $this->sameCaption($parts['post_text'], $reviseFrom)) {
+            $retryMessage = $this->userMessage($input)
+                ."\n\nCRITICAL: The previous output returned the exact same caption. Do NOT return the previous caption. Keep the same topic and hook, but rewrite the body with different shop-floor details, new phrasing, and fresh sentences.";
+
+            $raw = $this->writer->chat([
+                ['role' => 'system', 'content' => $instructions],
+                ['role' => 'user', 'content' => $retryMessage],
+            ], 1200);
+            $parts = $this->captionAndImage($raw);
+        }
+
         return [
             'data' => $parts,
             'raw' => $parts['post_text'],
@@ -104,30 +119,50 @@ class ManufacturingPostGenerator
 
             $plan = $this->topics->plan($bank, $history);
         }
-        $input['recent_posts'] = Generation::allBriefsFor($userId);
+
+        $daily = $this->topics->plan($this->dailyBank(), $history);
+        $prompt = trim((string) ($input['prompt'] ?? ''));
+        $revision = $this->wantsRevision($prompt);
+        $reviseFrom = trim((string) ($input['revise_from'] ?? ''));
+
+        if ($revision && $reviseFrom !== '') {
+            $input['recent_posts'] = Generation::briefsFor(
+                Generation::finishedFor($userId)->reject(
+                    fn (Generation $generation): bool => $this->sameCaption($generation->caption(), $reviseFrom),
+                )->values(),
+            );
+        } else {
+            $input['recent_posts'] = Generation::allBriefsFor($userId);
+        }
 
         if (trim((string) ($input['recent_topic_ids'] ?? '')) === '' && $plan['used'] !== []) {
             $input['recent_topic_ids'] = implode(', ', $plan['used']);
         }
 
-        $prompt = trim((string) ($input['prompt'] ?? ''));
         $existingTopic = strtoupper(trim((string) ($input['topic'] ?? '')));
-        $reference = $this->issueBank();
 
-        if ($this->wantsFreshTopic($prompt) && preg_match('/^(?:NEW-[A-Z]{3}|[A-Z]{2,5}-\d{2})$/', $existingTopic) !== 1) {
-            if (trim($reference) !== '') {
-                $direction = $this->topics->openDepartment($reference, $history);
-                $input['fresh_department'] = $direction['name'];
-                $input['reference_issues'] = $reference;
-                $this->rememberTopic($userId, 'NEW-'.$direction['code']);
-            } elseif ($plan['topic'] !== null) {
-                $input['topic'] = $plan['topic']['id'];
-                $input['assigned_topic'] = $plan['topic']['line'];
-                $this->rememberTopic($userId, $plan['topic']['id']);
-            }
+        if ($revision && preg_match('/^(?:NEW-[A-Z]{3}|[A-Z]{2,5}-\d{2})$/', $existingTopic) === 1) {
+            $this->rememberTopic($userId, $existingTopic);
+        } elseif (! $revision && $this->wantsFreshTopic($prompt) && preg_match('/^(?:NEW-[A-Z]{3}|[A-Z]{2,5}-\d{2})$/', $existingTopic) !== 1 && $daily['topic'] !== null) {
+            $input['topic'] = $daily['topic']['id'];
+            $input['assigned_topic'] = $daily['topic']['line'];
+            $this->rememberTopic($userId, $daily['topic']['id']);
         }
 
         return $input;
+    }
+
+    private function sameCaption(?string $left, string $right): bool
+    {
+        if ($left === null || trim($left) === '') {
+            return false;
+        }
+
+        $normalize = fn (string $text): string => Str::of($text)->lower()->replaceMatches('/\s+/u', ' ')->trim()->toString();
+
+        return $normalize($left) === $normalize($right)
+            || str_contains($normalize($left), Str::limit($normalize($right), 120, ''))
+            || str_contains($normalize($right), Str::limit($normalize($left), 120, ''));
     }
 
     private function wantsFreshTopic(string $prompt): bool
@@ -141,9 +176,25 @@ class ManufacturingPostGenerator
         return preg_match('/^(please\s+)?(generate|write|create|draft)(\s+(a|the))?\s+posts?\.?$/', $prompt) === 1;
     }
 
+    public function wantsRevision(string $prompt): bool
+    {
+        return app(PostIntent::class)->isRevision($prompt);
+    }
+
     private function issueBank(): string
     {
         $path = resource_path('prompts/manufacturing-issues.txt');
+
+        if (! is_file($path)) {
+            return '';
+        }
+
+        return (string) file_get_contents($path);
+    }
+
+    private function dailyBank(): string
+    {
+        $path = resource_path('prompts/daily-topics.txt');
 
         if (! is_file($path)) {
             return '';
@@ -183,8 +234,12 @@ class ManufacturingPostGenerator
         }
 
         $recent = trim((string) ($input['recent_posts'] ?? ''));
+        $revision = $this->wantsRevision($prompt);
+        $reviseFrom = trim((string) ($input['revise_from'] ?? ''));
         $lines = [
-            'Write one finished post. Do not ask a question.',
+            $revision
+                ? 'Rewrite one finished post. Do not ask a question. Do not return the previous caption.'
+                : 'Write one finished post. Do not ask a question.',
             '',
             'platform: '.($input['platform'] ?? 'LinkedIn'),
             'segment: '.($input['segment'] ?? 'small'),
@@ -193,14 +248,32 @@ class ManufacturingPostGenerator
             'User prompt:',
             $prompt !== '' ? $prompt : 'generate post',
             '',
-            'Every saved post for this account, newest first. These were checked before a topic was chosen. Do not repeat their hook or topic, and do not retell the same shop-floor moment in different words:',
-            $recent !== '' ? $recent : 'None yet.',
-            '',
         ];
+
+        if ($revision && $reviseFrom !== '') {
+            $lines[] = 'POST TO UPGRADE. Keep this shop-floor moment, this object, and this person waiting. Rewrite every sentence. The new caption must be clearly stronger and must not reuse these lines:';
+            $lines[] = $reviseFrom;
+            $lines[] = '';
+            $lines[] = 'Upgrade checklist. Change all of these:';
+            $lines[] = '1. A sharper hook that names the same object.';
+            $lines[] = '2. A scene the owner can see on the floor.';
+            $lines[] = '3. A team-cost sentence with the hours and the cost that belong to this moment.';
+            $lines[] = '4. A custom software sentence that saves that same fact and stops the next wrong action.';
+            $lines[] = '5. A new IMAGE brief for this same moment.';
+            $lines[] = 'If a sentence from the post above still fits, throw the whole caption away and rewrite it.';
+            $lines[] = 'Keep the same topic and hook theme, but write different, upgraded content for the scene, the cost, and the software fix.';
+            $lines[] = '';
+        }
+
+        $lines[] = $revision
+            ? 'Other saved posts for this account, newest first. Do not copy them, and do not switch to their moment:'
+            : 'Every saved post for this account, newest first. These were checked before a topic was chosen. Do not repeat their hook or topic, and do not retell the same shop-floor moment in different words:';
+        $lines[] = $recent !== '' ? $recent : 'None yet.';
+        $lines[] = '';
 
         $usedTopics = trim((string) ($input['recent_topic_ids'] ?? ''));
 
-        if ($usedTopics !== '') {
+        if ($usedTopics !== '' && ! $revision) {
             $lines[] = 'Topic IDs already used: '.$usedTopics;
             $lines[] = '';
         }
@@ -208,33 +281,40 @@ class ManufacturingPostGenerator
         $chat = trim((string) ($input['chat'] ?? ''));
         $department = trim((string) ($input['fresh_department'] ?? ''));
 
-        if ($chat !== '') {
+        if ($chat !== '' && ! $revision) {
             $lines[] = 'Chat so far:';
             $lines[] = $chat;
             $lines[] = $department === ''
                 ? 'The latest user prompt is the post to write. Keep the facts already stated. Do not swap in a different moment.'
                 : 'The user asked for a new post. Do not reuse a moment already in this chat.';
             $lines[] = '';
+        } elseif ($chat !== '' && $revision) {
+            $lines[] = 'Chat so far, for context only. The POST TO UPGRADE block above is the caption to rewrite:';
+            $lines[] = $chat;
+            $lines[] = 'Upgrade the post in POST TO UPGRADE. Keep its shop-floor moment, its object, and the person waiting. Rewrite the hook, the scene, the cost sentence, and the software sentence so the content is stronger. Do not return the previous caption. Do not reuse its sentences. Do not switch to a different topic.';
+            $lines[] = '';
         }
 
-        $reference = trim((string) ($input['reference_issues'] ?? ''));
         $assigned = trim((string) ($input['assigned_topic'] ?? ''));
 
-        if ($department !== '' && $reference !== '') {
-            $lines[] = 'Reference list. Use these as examples of a shop-floor handoff. Do not write any situation mentioned in this list, and do not retell one in different words:';
-            $lines[] = $reference;
-            $lines[] = '';
-            $lines[] = 'Invent one new shop-floor situation in '.$department.'. The new topic must not be mentioned in the reference list. It must not repeat a saved post. One broken handoff, one object, one person waiting.';
+        if ($revision) {
+            $lines[] = 'Stay on the upgraded moment. Do not assign a new daily topic. Do not invent a different factory problem.';
         } elseif ($assigned !== '') {
-            $lines[] = 'Assigned topic from the real shop-floor issues. It was chosen because this situation is not among the saved posts. Write this situation only. Do not pick a different topic and do not retell a saved post:';
+            $lines[] = 'Assigned daily topic. It was chosen because this situation is not among the saved posts. Write this situation only. Do not pick a different topic and do not retell a saved post:';
             $lines[] = $assigned;
             $lines[] = '';
-            $lines[] = 'The assigned topic is the post. Keep its problem. Add no client, number, or event the user did not give. Stage a picture for this topic that could not be reused for a different topic.';
+            $lines[] = 'The assigned topic is the post. Keep its object and the person waiting. Do not swap in a Tally mismatch, a WhatsApp job card, a pending challan balance, an In Progress board, or a shared tool unless the assigned topic is that situation.';
         } else {
             $lines[] = 'If the prompt names a shop-floor moment, that moment is the post. Keep its facts. Add no client, number, or event the user did not give.';
             $lines[] = 'If the prompt does not name a moment, choose one topic ID from Section 6 that is not in the saved posts. Rotate the department. Stage that topic into one picture that could not be reused for a different topic.';
         }
         $lines[] = 'Put one shop-floor emoji on the hook only (🏭 📋 📞 ⏱️ 📦 🚚 ✅ 👀). Do not put an emoji anywhere else in the caption: not on the scene, the cost, the software line, the closing, the footer, or the hashtags. Never write an asterisk. No markdown and no * bullets.';
+        $lines[] = 'Make the caption strong and specific. The hook is 12 words or fewer: a punchy observation, an overheard dialogue quote, or a sharp question that names the object in the assigned topic. The next line is 8 words or fewer and is the consequence already in that topic. The scene is three short lines a person can see: that object, the person waiting, and the wrong action about to happen.';
+        $lines[] = 'Show the effect on the business inside the caption. The team-cost sentence names the hours lost on a normal day and the cost those hours cause. Use only the cost already written in the assigned topic. A wrong label costs rebuilt cartons and a waiting truck. An untagged offcut costs a fresh coil cut while a usable piece sits on the bench. These two lessons are not the post. Do not paste a cost from another problem.';
+        $lines[] = 'The solution must answer that same daily problem. The solution sentence must contain the words custom software. When the person who has the fact saves it in custom software, the person waiting sees that same fact before the next wrong action. The wrong action is the next physical step in the assigned topic. Name which hours and which cost belong to this topic, in floor words. Do not write "the search stops, and the idle machine stops" unless this topic is a search beside an idle machine. Do not write "the recount stops, and the remade lot stops" unless this topic is a recount and a remake. Do not write "does not happen". Do not write "cost does not happen". Do not write job ID, job history, status, or data. Use shop-floor words. Do not invent rupees, percentages, piece counts, kilograms, or hours. Do not use the word efficiency.';
+        $lines[] = $revision
+            ? 'The upgraded caption must read as a new draft of the same moment. Do not print these checks.'
+            : 'Stay on the assigned daily topic when one is given. Do not replace it. Do not print these checks.';
         $lines[] = 'Write the finished caption first. Never return JSON, field names, or a code block, even if asked for JSON.';
         $lines[] = 'After the caption, on its own line, write IMAGE: and then four to six sentences that an image model can draw.';
         $lines[] = 'Each sentence places one physical object and says where it sits: in front, behind, to the left, or on the bench. One object is missing, drawn as an empty dashed outline. One object is the problem because of where it sits, not because the sentence explains it.';
@@ -309,7 +389,7 @@ class ManufacturingPostGenerator
         if (preg_match_all('/[^.!?]+[.!?]+(?:\s+|$)/u', $scene, $sentences) > 0) {
             $kept = array_values(array_filter(
                 $sentences[0],
-                fn (string $sentence): bool => preg_match('/\b(screen|display|expression|eyes|sticker|signed|handwriting|logo|watermark|handshake|lightbulb|rocket|message|chat)\b|broken handoff|the problem/i', $sentence) !== 1,
+                fn (string $sentence): bool => preg_match('/\b(screen|display|expression|eyes|sticker|signed|handwriting|logo|watermark|handshake|lightbulb|rocket|message|chat|focus|nobody)\b|broken handoff|the problem|idle time/i', $sentence) !== 1,
             ));
 
             if ($kept !== []) {

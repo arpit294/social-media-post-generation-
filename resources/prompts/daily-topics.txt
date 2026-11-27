@@ -1,0 +1,44 @@
+# Daily shop-floor topics. The app assigns the first unused line. Write that line only.
+DAY-01 Old carton labels: Packing prints carton labels for the previous quantity after sales changes the target by phone. The packing table keeps building the old count, then rebuilds the cartons.
+DAY-02 Untagged offcut: Stores issues a full coil when the job needs a cut length. The leftover offcut sits beside the machine with no lot and no job.
+DAY-03 Wrong pallet: Two customer orders with similar names are staged side by side. One pallet is loaded onto the wrong tempo.
+DAY-04 Promised date: Sales promises a delivery date before anyone checks the machine that is already full. A job that was already committed gets pushed aside.
+DAY-05 Almost ready note: The outgoing shift writes that the machine is almost ready and leaves out the pending check. The next shift starts the machine too early.
+DAY-06 Old checklist: The drawing revision changes, and the inspection checklist still clipped to the bench is the previous revision.
+DAY-07 Loose rework sheet: Rework is finished and the result sits on a loose sheet. The job card still looks open, so dispatch waits to pack.
+DAY-08 Wrong spare bin: The spare is in the store, but the bin written on the old note is wrong. The technician searches the racks while the machine stays down.
+DAY-09 Double request: Maintenance and production both raise a request for the same consumable on the same morning. Neither request can see the other.
+DAY-10 Partial receipt closed: A supplier sends only part of the material. Stores closes the receipt as if the full quantity arrived. The balance never comes.
+DAY-11 Mixed scrap bin: Scrap rod from two jobs goes into one bin. The owner cannot see which job wasted the material.
+DAY-12 Two delivery drops: The party asks for the order in two drops. Dispatch still plans one full tempo load.
+DAY-13 Cancelled quantity: The party cancels part of the order by phone. Stores still issues material for the full quantity.
+DAY-14 Previous carton spec: Packing builds the carton size from the previous order because the new pack note stayed with sales.
+DAY-15 Gate quantity: The bill is prepared for the ordered quantity. Rejected pieces were already taken out, and the difference is found while the tempo is at the gate.
+DAY-16 Early tempo: The tempo arrives early. The goods are packed, but the papers are still on the office desk.
+DAY-17 Mixed trolley: Two similar batches share one trolley and have no separate tags. The next operation starts the wrong batch.
+DAY-18 Unentered quantity: The first operation finishes, but the finished quantity is never entered. The next bench is free and does not know the lot is ready.
+DAY-19 Phone breakdown: The machine stop is reported by phone and no work note is written. Later, production and maintenance disagree about when the machine stopped.
+DAY-20 Slipped crates: A rush crate is pulled to the front of the queue. The crates behind it have no revised date, so one party delivery slips.
+DAY-21 Untagged return: Material comes back from the floor and is put on the rack with no lot and no grade. The next issue cannot tell whether it is usable.
+DAY-22 Untagged sample: The party approves a sample with one small change. That sample is not tagged to the order, so production copies the earlier sample.
+DAY-23 Plating return: Parts leave for plating with a gate pass. The day they come back is not on the planning board, so assembly waits.
+DAY-24 Borrowed die: The other line borrows the die and does not bring it back before the next setup. The operator waits beside the machine.
+DAY-25 First-off diary: The first piece is approved by voice and the note stays in the inspector's diary. The next shift runs without that approval.
+DAY-26 Material not released: The job is sent to the machine before the raw material reaches the store counter. The operator finishes the first step and then waits.
+DAY-27 Handover recount: The job slips into the next shift. The note names the machine and not the pieces already done, so the incoming shift counts them again.
+DAY-28 Later order first: Two orders with similar names sit next to each other on the planning board. The team starts the later delivery first.
+DAY-29 Protective pack note: A long trip needs extra protective packing. The instruction stays with sales, and the packing operator cannot see it.
+DAY-30 Old vehicle pass: The transporter sends a different vehicle. The gate pass still names the first vehicle, so the tempo waits at the gate.
+DAY-31 WhatsApp job card: The party changes the size on WhatsApp and the operator keeps running the old printed job card.
+DAY-32 In Progress status: The board says In Progress for days and hides whether the job is waiting for material or for a machine.
+DAY-33 Register versus Tally: The stock register and Tally show different quantities for the same lot.
+DAY-34 Earmarked stock: The rack shows a full quantity, but most of it is already earmarked for another job.
+DAY-35 Pending challan balance: Three challans have gone out and nobody can say the pending balance.
+DAY-36 Key clerk: One clerk holds the method, and the work slows when that person is away.
+DAY-37 Verbal printed plan: A verbal rush changes the sequence and cutting keeps working from the old printed plan.
+DAY-38 Rejected good tray: A rejected piece stays in the good tray and packing picks it up.
+DAY-39 Repair trial run: The technician signs the repair and the operator starts the machine before the trial run is written down.
+DAY-40 Detached job card: A batch moves to the next bench without its job card, and that bench stops to identify the lot.
+DAY-41 Supplier phone date: The supplier confirms a new date by phone and the purchase order still shows the old date.
+DAY-42 Two department sheets: The production sheet and the dispatch sheet show two different quantities for the same order.
+DAY-43 Shared cutting tool: Two jobs need the same cutting tool and the second operator waits at the machine.
